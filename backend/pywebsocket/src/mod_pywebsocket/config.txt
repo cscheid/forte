@@ -1,0 +1,2 @@
+[pywebsocket]
+log_level=debug
