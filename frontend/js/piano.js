@@ -8,21 +8,14 @@ function make_chart(div)
     //                     C  C#   D  D#   E   F  F#   G  G#   A  A#   B
     var key_xs_index    = [0, 11, 15, 26, 30, 45, 56, 60, 71, 75, 86, 90];
     var key_color_index = [0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  1,  0];
-    var y_color   = [0, 30];
-    var key_width = [15, 8];
+    var y_color         = [0, 30];
+    var key_width       = [15, 8];
 
-    function which_key(d) {
-        return key_color_index[d % 12];
-    }
-    function key_color(d) {
-        return ["white", "black"][which_key(d)];
-    }
-    function which_octave(d) {
-        return ~~(d / 12);
-    }
+    function which_key(d) { return key_color_index[d % 12]; }
+    function key_color(d) { return ["white", "black"][which_key(d)]; }
+    function which_octave(d) { return ~~(d / 12); }
     function which_x(d) {
-        var octave = which_octave(d);
-        return key_xs_index[d % 12] + (105 * octave);
+        return key_xs_index[d % 12] + (105 * which_octave(d));
     }
 
     function init_chart()
@@ -72,7 +65,27 @@ function make_chart(div)
     };
 }
 
-var chart = make_chart(d3.select("#piano_div"));
+function make_client(div, url)
+{
+    var chart = make_chart(div);
+    var socket;
+    return {
+        chart: chart,
+        connect: function() {
+            socket = new WebSocket(url);
+            socket.onmessage = function(msg) {
+                var x = JSON.parse(msg.data);
+                if (x[1] == 0) 
+                    chart.key_up(x[0]);
+                else if (x[1] == 1)
+                    chart.key_down(x[0]);
+            };
+        }
+    };
+}
+
+var chart = make_client(d3.select("#piano_div"), "ws://localhost:8880/midi_stream");
+chart.connect();
 
 // window.setTimeout(function() { chart.key_down(30); }, 1000);
 // window.setTimeout(function() { chart.key_up(30); }, 2000);
