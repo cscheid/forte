@@ -3,7 +3,7 @@ var chart_height = 320;
 var key_height = 90;
 var data = _.range(21, 109);
 
-function make_chart(div)
+function make_dashboard(divs)
 {
     //                     C  C#   D  D#   E   F  F#   G  G#   A  A#   B
     var key_xs_index    = [0, 11, 15, 26, 30, 45, 56, 60, 71, 75, 86, 90];
@@ -18,9 +18,9 @@ function make_chart(div)
         return key_xs_index[d % 12] + (105 * which_octave(d));
     }
 
-    function init_chart()
+    function init_piano_chart()
     {
-        var chart = div.append("svg");
+        var chart = divs.piano.append("svg");
         chart
             .attr("width", chart_width)
             .attr("height", chart_height);
@@ -53,39 +53,42 @@ function make_chart(div)
         return chart;
     }
 
-    var chart = init_chart();
+    var piano_chart = init_piano_chart();
     return {
-        chart: chart,
+        piano_chart: piano_chart,
         key_down: function(d) {
-            chart.select(".key-" + d).attr("fill", "red");
+            piano_chart.select(".key-" + d).attr("fill", "red");
         },
         key_up: function(d) {
-            chart.select(".key-" + d).attr("fill", key_color);
+            piano_chart.select(".key-" + d).attr("fill", key_color);
         }
     };
 }
 
-function make_client(div, url)
+function make_client(divs, url)
 {
-    var chart = make_chart(div);
+    var dashboard = make_dashboard(divs);
     var socket;
     return {
-        chart: chart,
+        dashboard: dashboard,
         connect: function() {
             socket = new WebSocket(url);
             socket.onmessage = function(msg) {
                 var x = JSON.parse(msg.data);
                 if (x[1] == 0) 
-                    chart.key_up(x[0]);
+                    dashboard.key_up(x[0]);
                 else if (x[1] == 1)
-                    chart.key_down(x[0]);
+                    dashboard.key_down(x[0]);
             };
         }
     };
 }
 
-var chart = make_client(d3.select("#piano_div"), "ws://" + window.location.hostname + ":8880/midi_stream");
-chart.connect();
+var client = make_client({ piano: d3.select("#piano"), 
+                           velocity: d3.select("#velocity")
+                         },
+                         "ws://" + window.location.hostname + ":8880/midi_stream");
+client.connect();
 
 // window.setTimeout(function() { chart.key_down(30); }, 1000);
 // window.setTimeout(function() { chart.key_up(30); }, 2000);
