@@ -1,5 +1,5 @@
 var chart_width = 960;
-var chart_height = 320;
+var chart_height = 90;
 var key_height = 90;
 var data = _.range(21, 109);
 
@@ -53,11 +53,30 @@ function make_dashboard(divs)
         return chart;
     }
 
+    function init_velocity_chart()
+    {
+        var velocity_chart = divs.velocity.append("svg");
+        velocity_chart.attr("width", chart_width);
+        velocity_chart.attr("height", chart_height * 2);
+        return velocity_chart;
+    }
+
     var piano_chart = init_piano_chart();
+    var velocity_chart = divs.velocity.append("svg");
     return {
         piano_chart: piano_chart,
-        key_down: function(d) {
+        velocity_chart: velocity_chart,
+        key_down: function(d, v) {
             piano_chart.select(".key-" + d).attr("fill", "red");
+            var rect = velocity_chart.append("rect");
+            // console.log(
+            rect.attr("x", 960)
+                .attr("y", v / 127.0 * (chart_height * 2)-2)
+                .attr("width", 10)
+                .attr("height", 4)
+                .attr("fill", "black")
+            ;
+            rect.transition().attr("x", 0).ease(function(t) { return t; }).duration(10000).remove();
         },
         key_up: function(d) {
             piano_chart.select(".key-" + d).attr("fill", key_color);
@@ -76,7 +95,7 @@ function make_client(divs, url)
             socket.onmessage = function(msg) {
                 var x = JSON.parse(msg.data);
                 if (x[1] == 0) 
-                    dashboard.key_up(x[0]);
+                    dashboard.key_up(x[0], x[2]);
                 else if (x[1] == 1)
                     dashboard.key_down(x[0]);
             };
@@ -89,6 +108,3 @@ var client = make_client({ piano: d3.select("#piano"),
                          },
                          "ws://" + window.location.hostname + ":8880/midi_stream");
 client.connect();
-
-// window.setTimeout(function() { chart.key_down(30); }, 1000);
-// window.setTimeout(function() { chart.key_up(30); }, 2000);

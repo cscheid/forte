@@ -3,10 +3,12 @@ import pygame.midi
 
 has_init = False
 def init_midi_interface():
-    global has_init
-    if not has_init:
+    if not pygame.midi._init:
         pygame.midi.init()
-        has_init = True
+    # global has_init
+    # if not has_init:
+    #     pygame.midi.init()
+    #     has_init = True
 
 ##############################################################################
 

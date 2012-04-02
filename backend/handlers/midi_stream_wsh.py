@@ -18,5 +18,5 @@ def web_socket_transfer_data(request):
     for [[evt_type, key_code, velocity, _], timestamp] in reader.read():
         t = d[evt_type]
         log.key_event(evt_type, key_code, velocity, timestamp)
-        request.ws_stream.send_message("[%d, %d]" % (key_code, t))
+        request.ws_stream.send_message("[%d, %d, %d]" % (key_code, t, velocity))
         
