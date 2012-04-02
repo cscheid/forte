@@ -16,8 +16,10 @@ def web_socket_transfer_data(request):
     #     request.ws_stream.send_message("[%d, %d]" % (i, 1))
     #     time.sleep(1)
     #     request.ws_stream.send_message("[%d, %d]" % (i, 0))
-    for evt in reader.read():
-        print evt
+    d = {144: 1, 128: 0}
+    for [[evt_type, key_code, velocity, _], timestamp] in reader.read():
+        t = d[evt_type]
+        request.ws_stream.send_message("[%d, %d]" % (key_code, t))
     # while True:
     #     line = request.ws_stream.receive_message()
     #     if line is None:

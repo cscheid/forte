@@ -84,7 +84,7 @@ function make_client(div, url)
     };
 }
 
-var chart = make_client(d3.select("#piano_div"), "ws://localhost:8880/midi_stream");
+var chart = make_client(d3.select("#piano_div"), "ws://" + window.location.hostname + ":8880/midi_stream");
 chart.connect();
 
 // window.setTimeout(function() { chart.key_down(30); }, 1000);

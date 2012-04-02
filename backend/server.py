@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+sys.path.append('pywebsocket/src')
 from mod_pywebsocket.standalone import WebSocketServer
 from mod_pywebsocket import dispatch
 
